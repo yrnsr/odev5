@@ -1,38 +1,37 @@
 version: '3.8'
+
 services:
   rethinkdb:
-    image: rethinkdb:latest
+    image: rethinkdb
+    container_name: rethinkdb
     ports:
-      - "28015:28015"
-      - "29015:29015"
+      - "8080:8080"  
+      - "28015:28015"  
+      - "29015:29015"  
     volumes:
       - rethinkdb_data:/data
-    environment:
-      RETHINKDB_DRIVER_TCP_BACKLOG: 512
 
   server:
-    build:
-      context: .   
-      dockerfile: server/Dockerfile  
-    ports:
-      - "3000:3000"
-    depends_on:
-      - rethinkdb
-    environment:
-      - NODE_ENV=development
-    volumes:
-      - ./server:/app  
-
-  client:
-    build:
-      context: ./client 
-      dockerfile: Dockerfile  
+    build: ./server
+    container_name: todo-server
     ports:
       - "5000:5000"
-    environment:
-      - NODE_ENV=development
+    depends_on:
+      - rethinkdb
     volumes:
-      - ./client:/app  
+      - ./server:/app
+    environment:
+      - NODE_ENV=production
+
+  client:
+    image: nginx
+    container_name: todo-client
+    ports:
+      - "80:80"
+    volumes:
+      - ./client/public:/usr/share/nginx/html
+    depends_on:
+      - server
 
 volumes:
   rethinkdb_data:

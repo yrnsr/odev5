@@ -1,9 +1,11 @@
-
-FROM node:16
-
+FROM node:18
 
 WORKDIR /app
 
+COPY package.json ./
 
-COPY ./server/package*.json ./  # server dizinindeki package.json
+RUN npm install
 
+COPY . .
+
+CMD ["node", "server.js"]
